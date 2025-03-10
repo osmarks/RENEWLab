@@ -11,7 +11,7 @@
 """
 
 import numpy as np
-from generate_sequence import *
+from .generate_sequence import *
 import matplotlib
 import matplotlib.pyplot as plt
 import scipy.io as sio  # For .mat format

@@ -58,3 +58,6 @@ venv
 
 # Database
 renew.db
+
+renewlab_fix.egg-info
+dist

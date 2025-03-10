@@ -23,7 +23,7 @@ import datetime
 from scipy import signal
 import multiprocessing as mp
 import matplotlib.pyplot as plt
-from generate_sequence import *
+from .generate_sequence import *
 
 
 def calCond(userCSI):
@@ -34,7 +34,7 @@ def calCond(userCSI):
 
     Returns:
             condNumber_ave: The average condition number across all users and subcarriers.
-            condNumber: Numpy array of condition number [Frame, Subcarrier]. 
+            condNumber: Numpy array of condition number [Frame, Subcarrier].
     """
     condNumber = np.empty(
         (userCSI.shape[0], userCSI.shape[3]), dtype='float32')
@@ -236,41 +236,41 @@ def calExpectedCapacity(csi, user=0, max_delay=100, conj=True, downlink=False):
 
 def find_bad_nodes(csi, corr_thresh=0.32, user=0):
     """Find bad Iris nodes.
-	
-    Find bad nodes based on the correlation between a reference node 
-    and every other node. If all nodes are 'bad' then the reference 
-    node is assumed to be bad, and a new reference node is chosen. The 
+
+    Find bad nodes based on the correlation between a reference node
+    and every other node. If all nodes are 'bad' then the reference
+    node is assumed to be bad, and a new reference node is chosen. The
     reference node is picked sequentially from the list of BS antennas.
-    
-    Note: 
-        csi should be a channel trace taken in a stable environment. 
+
+    Note:
+        csi should be a channel trace taken in a stable environment.
         If AGC is used, csi should be taken after AGC has settled.
-	
+
 	Note:
-        By only correlating one node with another, the decorrelation 
-        is maximized when there is a sync issue. (If you use more 
-        antennas for reference, the impact of the time sync is less. 
-        If you use fewer, the bad antennas, which have all of the same 
+        By only correlating one node with another, the decorrelation
+        is maximized when there is a sync issue. (If you use more
+        antennas for reference, the impact of the time sync is less.
+        If you use fewer, the bad antennas, which have all of the same
         phase shift, dominate correlation.)
-        
-        An important trick is to normalize amplitudes of the CSI so 
-        that the phase shift always has the same impact, regardless of 
-        channel gains (i.e. if the reference node has low or high 
-        signal strength relative to the bad node it would decrease the 
-        impact of a time sync issue). 
-        
-        This also allows a fixed threshold to work well as a single 
-        sample shift of 4 antennas out of 8 relatively consistently 
-        causes a decorrelation of .25. If half the samples (worst 
+
+        An important trick is to normalize amplitudes of the CSI so
+        that the phase shift always has the same impact, regardless of
+        channel gains (i.e. if the reference node has low or high
+        signal strength relative to the bad node it would decrease the
+        impact of a time sync issue).
+
+        This also allows a fixed threshold to work well as a single
+        sample shift of 4 antennas out of 8 relatively consistently
+        causes a decorrelation of .25. If half the samples (worst
         case), this is a .125 deviation from the mean.
-	
+
 	Args:
         csi: Complex array [Frame, User, Pilot Rep, BS Ant, Subcarrier]
-		thresh: Lower threshold means more sensitivity to deviation in 
-            correlation. Higher shall give more false negatives, lower 
+		thresh: Lower threshold means more sensitivity to deviation in
+            correlation. Higher shall give more false negatives, lower
             shall give more false positives.
 		user: The index of the user to use for correlation.
-		
+
 	Returns:
 		bad_nodes: A list of indices of nodes determined to be bad.
 
@@ -286,7 +286,7 @@ def find_bad_nodes(csi, corr_thresh=0.32, user=0):
         ref_good = False
         ref = num_nodes//2  # 0
         node_good = [True] * num_nodes
-        # Must normalize amplitude so that the phase shift always has 
+        # Must normalize amplitude so that the phase shift always has
         # the same effect on correlation.
         userCSI_abs = np.abs(userCSI)
         userCSI_abs[userCSI_abs == 0] = 1
@@ -318,7 +318,7 @@ def find_bad_nodes(csi, corr_thresh=0.32, user=0):
                             "nodes, perhaps just 1 is bad.")
                         ref_good = True  # Used to exit the while loop.
                         node_good = [False] * num_nodes
-                
+
     bad_nodes = [i+1 for i, x in enumerate(node_good) if not x]
     return bad_nodes
 
@@ -326,8 +326,8 @@ def find_bad_nodes(csi, corr_thresh=0.32, user=0):
 def calCorr(userCSI, corr_vec):
     """Calculate instantaneous correlation with a correlation vector.
 
-    Sub-samples userCSI in the time/user/subcarrier slice before 
-    passing it. If slicing just one user, dimensionality has to be 
+    Sub-samples userCSI in the time/user/subcarrier slice before
+    passing it. If slicing just one user, dimensionality has to be
     maintained, i.e. slice like userCSI[:,[2],:,:].
 
     Args:
@@ -339,11 +339,11 @@ def calCorr(userCSI, corr_vec):
         sig_sc: Correlation on every [Frame, User, Subcarrier].
 
     Typical usage example:
-        corr_total,sig_sc = calCorr(userCSI, 
+        corr_total,sig_sc = calCorr(userCSI,
             np.transpose(np.conj(userCSI[frame,:,:,:]),(1,0,2)))
 
     """
-    sig_intf = np.empty((userCSI.shape[0], userCSI.shape[1], 
+    sig_intf = np.empty((userCSI.shape[0], userCSI.shape[1],
                          userCSI.shape[1], userCSI.shape[3]), dtype='float32')
 
     for sc in range(userCSI.shape[3]):
@@ -436,4 +436,3 @@ def mlDetector(csi_f, ul_syms_f, mod_syms):
 
     ul_demod_syms = demod_sc_real[:, :n_users, :] + 1j*demod_sc_real[:, n_users:, :]
     return ul_demod_syms
-

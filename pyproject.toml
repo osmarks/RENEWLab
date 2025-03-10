@@ -1,0 +1,20 @@
+[project]
+name = "renewlab_fix"
+version = "0.0.1"
+description = "RENEWLab is an open-source software toolbox for the RENEW massive MIMO platform."
+readme = "README.md"
+dependencies = [
+    "scipy",
+    "matplotlib",
+    "h5py",
+    "setuptools",
+    "scikit-learn",
+    "transitions"
+]
+
+[tool.setuptools.package-dir]
+renewlab = "PYTHON/IrisUtils"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

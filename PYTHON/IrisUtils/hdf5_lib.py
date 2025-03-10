@@ -18,11 +18,11 @@ import matplotlib.pyplot as plt
 import collections
 import time
 from optparse import OptionParser
-from channel_analysis import *
+from .channel_analysis import *
 import multiprocessing as mp
-import extract_pilots_data as epd
-from find_lts import *
-from ofdmtxrx import ofdmTxRx
+from . import extract_pilots_data as epd
+from .find_lts import *
+from .ofdmtxrx import ofdmTxRx
 
 class hdf5_lib:
     def __init__(self, filename, tx_files, n_frames_to_inspect=0, n_fr_insp_st = 0, sub_sample = 0):
@@ -287,17 +287,17 @@ class hdf5_lib:
     def samps2csi(samps, num_users, samps_per_user=224, fft_size=64, offset=0, bound=94, cp=0, pilot_f=[], legacy=False, chunk_id=-1, fft_shifted_dataset=True):
         """Convert an Argos HDF5 log file with raw IQ in to CSI.
         Asumes 802.11 style LTS used for trace collection.
-    
+
         Args:
             samps: The h5py or numpy array containing the raw IQ samples,
                 dims = [Frame, Cell, User, Antenna, Sample].
             num_users: Number of users used in trace collection. (Last 'user' is noise.)
             samps_per_user: Number of samples allocated to each user in each frame.
-     
+
         Returns:
             csi: Complex numpy array with [Frame, Cell, User, Pilot Rep, Antenna, Subcarrier]
             iq: Complex numpy array of raw IQ samples [Frame, Cell, User, Pilot Rep, Antenna, samples]
-     
+
         Example:
             h5log = h5py.File(filename,'r')
             csi,iq = samps2csi(h5log['Pilot_Samples'], h5log.attrs['num_mob_ant']+1, h5log.attrs['samples_per_user'])
@@ -401,7 +401,7 @@ class hdf5_lib:
                 noise_power = np.mean(np.power(np.abs(noise), 2), 4) * len(nonzero_sc)
                 signal_power = np.sum(np.power(np.abs(iq_fft[:, :, :, :, nonzero_sc]), 2), 4)
                 SNR_per_sym = (signal_power - noise_power) / noise_power
-                SNR = np.mean(SNR_per_sym, 2) # average across ofdm symbols 
+                SNR = np.mean(SNR_per_sym, 2) # average across ofdm symbols
                 print("SNR.shape:{}".format(SNR.shape))
 
             endtime = time.time()
@@ -864,4 +864,3 @@ class hdf5_lib:
 
 
         return ul_equal_syms, ul_demod_syms, tx_data_syms, slot_evm, slot_evm_snr, slot_ser
-
